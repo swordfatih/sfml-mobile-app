@@ -17,8 +17,7 @@ int main()
     sf::Font font("assets/play.ttf");
     sf::Text text(font, "nadia :)");
 
-    auto size = window.getSize();
-    text.setPosition(sf::Vector2f{size.x / 2.f, size.y / 2.f});
+    text.setPosition(shape.getGlobalBounds().getCenter());
 
     auto speed = 5.f;
     auto start = std::chrono::steady_clock::now();

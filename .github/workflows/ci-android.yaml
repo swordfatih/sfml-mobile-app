@@ -46,11 +46,15 @@ jobs:
 
       - name: Create Android NativeActivity project
         run: |
+          MOBILE_ICON=$(jq -r '.MOBILE_ICON' config.json)
+
           mkdir -p android-tmp/{libs/arm64-v8a,src/main/java,assets,res/values}
           cp build-android/lib${APP_NAME}.so android-tmp/libs/arm64-v8a/
+
           cat > android-tmp/AndroidManifest.xml <<EOF
           <manifest xmlns:android="http://schemas.android.com/apk/res/android" package="${APP_ID}">
-            <application android:label="${APP_NAME}" android:hasCode="false">
+            <application android:label="${APP_NAME}" android:hasCode="false"
+                         android:icon="@mipmap/ic_launcher">
               <activity android:name="android.app.NativeActivity"
                         android:label="${APP_NAME}"
                         android:configChanges="orientation|keyboardHidden">
@@ -64,11 +68,20 @@ jobs:
             <uses-sdk android:minSdkVersion="21" android:targetSdkVersion="33" />
           </manifest>
           EOF
+
           cat > android-tmp/res/values/strings.xml <<EOF
           <resources>
               <string name="app_name">${APP_NAME}</string>
           </resources>
           EOF
+
+          sudo apt-get install -y imagemagick
+          for density in mdpi:48 hdpi:72 xhdpi:96 xxhdpi:144 xxxhdpi:192; do
+            dir="android-tmp/res/mipmap-${density%%:*}"
+            size="${density##*:}"
+            mkdir -p "$dir"
+            convert "${MOBILE_ICON}" -resize ${size}x${size} "$dir/ic_launcher.png"
+          done
 
       - name: Package Unsigned APK
         run: |

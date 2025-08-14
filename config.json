@@ -1,4 +1,5 @@
 {
   "APP_NAME": "sfml_app",
-  "APP_ID": "com.example.sfml_app"
+  "APP_ID": "com.example.sfml_app",
+  "MOBILE_ICON": "assets/icon.png"
 }

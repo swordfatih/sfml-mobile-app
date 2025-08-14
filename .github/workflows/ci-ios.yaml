@@ -43,9 +43,24 @@ jobs:
                   <integer>1</integer>
                   <integer>2</integer>
               </array>
+              <key>CFBundleIconFiles</key>
+              <array>
+                  <string>icon</string>
+              </array>
+              <key>CFBundleIcons</key>
+              <dict>
+                  <key>CFBundlePrimaryIcon</key>
+                  <dict>
+                      <key>CFBundleIconFiles</key>
+                      <array>
+                          <string>icon</string>
+                      </array>
+                  </dict>
+              </dict>
           </dict>
           </plist>
           EOF
+
 
       - name: Configure for iOS
         run: |
