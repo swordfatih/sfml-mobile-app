@@ -1,0 +1,91 @@
+name: Android Build
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-android:
+    name: Android Unsigned APK
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Load App Config
+        run: |
+          APP_NAME=$(jq -r '.APP_NAME' config.json)
+          APP_ID=$(jq -r '.APP_ID' config.json)
+          echo "APP_NAME=$APP_NAME" >> $GITHUB_ENV
+          echo "APP_ID=$APP_ID" >> $GITHUB_ENV
+
+      - name: Install CMake & Java
+        run: sudo apt-get update && sudo apt-get install -y cmake openjdk-17-jdk unzip wget jq
+
+      - name: Download Android SDK & NDK
+        run: |
+          wget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O cmdline-tools.zip
+          unzip cmdline-tools.zip -d $HOME
+          mkdir -p $HOME/android-sdk/cmdline-tools
+          mv $HOME/cmdline-tools $HOME/android-sdk/cmdline-tools/latest
+          yes | $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --sdk_root=$HOME/android-sdk \
+            "platform-tools" "build-tools;34.0.0" "platforms;android-33" "ndk;26.1.10909125"
+
+      - name: Build SFML Game for Android
+        run: |
+          cmake -S . -B build-android \
+            -DCMAKE_SYSTEM_NAME=Android \
+            -DCMAKE_ANDROID_NDK=$HOME/android-sdk/ndk/26.1.10909125 \
+            -DCMAKE_ANDROID_ARCH_ABI=arm64-v8a \
+            -DCMAKE_ANDROID_STL_TYPE=c++_static \
+            -DANDROID_PLATFORM=android-21 \
+            -DAPP_NAME=${APP_NAME}
+          cmake --build build-android --config Release
+
+      - name: Create Android NativeActivity project
+        run: |
+          mkdir -p android-tmp/{libs/arm64-v8a,src/main/java,assets,res/values}
+          cp build-android/lib${APP_NAME}.so android-tmp/libs/arm64-v8a/
+          cat > android-tmp/AndroidManifest.xml <<EOF
+          <manifest xmlns:android="http://schemas.android.com/apk/res/android" package="${APP_ID}">
+            <application android:label="${APP_NAME}" android:hasCode="false">
+              <activity android:name="android.app.NativeActivity"
+                        android:label="${APP_NAME}"
+                        android:configChanges="orientation|keyboardHidden">
+                <meta-data android:name="android.app.lib_name" android:value="${APP_NAME}" />
+                <intent-filter>
+                  <action android:name="android.intent.action.MAIN" />
+                  <category android:name="android.intent.category.LAUNCHER" />
+                </intent-filter>
+              </activity>
+            </application>
+            <uses-sdk android:minSdkVersion="21" android:targetSdkVersion="33" />
+          </manifest>
+          EOF
+          cat > android-tmp/res/values/strings.xml <<EOF
+          <resources>
+              <string name="app_name">${APP_NAME}</string>
+          </resources>
+          EOF
+
+      - name: Package Unsigned APK
+        run: |
+          SDK_ROOT=$HOME/android-sdk
+          BUILD_TOOLS=$SDK_ROOT/build-tools/34.0.0
+          mkdir -p unsigned-apk
+          $BUILD_TOOLS/aapt package -F unsigned-apk/${APP_NAME}.apk \
+            -M android-tmp/AndroidManifest.xml \
+            -S android-tmp/res \
+            -A android-tmp/assets \
+            -I $SDK_ROOT/platforms/android-33/android.jar \
+            android-tmp/libs
+          $BUILD_TOOLS/zipalign -p 4 unsigned-apk/${APP_NAME}.apk unsigned-apk/${APP_NAME}-aligned.apk
+          mv unsigned-apk/${APP_NAME}-aligned.apk unsigned-apk/${APP_NAME}.apk
+
+      - name: Upload Unsigned APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-unsigned-apk
+          path: unsigned-apk/*.apk

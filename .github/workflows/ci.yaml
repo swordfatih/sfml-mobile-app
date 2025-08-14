@@ -1,6 +1,9 @@
-name: CI
+name: Desktop Build
 
-on: [push, pull_request]
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
 
 defaults:
   run:
@@ -36,38 +39,3 @@ jobs:
 
     - name: Build
       run: cmake --build build --config Release
-
-  build-ios:
-    name: iOS Unsigned IPA
-    runs-on: macos-14
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install CMake
-        run: brew install cmake
-
-      - name: Configure for iOS
-        run: |
-          cmake -S . -B build-ios \
-            -DCMAKE_SYSTEM_NAME=iOS \
-            -DCMAKE_OSX_SYSROOT=iphoneos \
-            -DCMAKE_OSX_ARCHITECTURES=arm64 \
-            -DCMAKE_CXX_STANDARD=23 \
-            -DBUILD_SHARED_LIBS=OFF
-
-      - name: Build for iOS
-        run: cmake --build build-ios --config Release
-
-      - name: Package Unsigned IPA
-        run: |
-          APP_NAME=MyApp
-          mkdir -p Payload
-          cp -R build-ios/Release-iphoneos/${APP_NAME}.app Payload/
-          zip -r ${APP_NAME}-unsigned.ipa Payload
-          rm -rf Payload
-
-      - name: Upload IPA
-        uses: actions/upload-artifact@v4
-        with:
-          name: ios-unsigned-ipa
-          path: '*.ipa'
