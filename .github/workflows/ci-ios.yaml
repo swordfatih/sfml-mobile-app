@@ -67,8 +67,13 @@ jobs:
       - name: Package Unsigned IPA
         run: |
           mkdir -p Payload
-          cp -R build-ios/Release/${APP_NAME}.app Payload/
-          zip -r ${APP_NAME}-unsigned.ipa Payload
+          APP_PATH=$(find build-ios -type d -name "${APP_NAME}.app" | head -n 1)
+          if [ -z "$APP_PATH" ]; then
+            echo "Error: .app bundle not found!"
+            exit 1
+          fi
+          cp -R "$APP_PATH" Payload/
+          zip -r "${APP_NAME}-unsigned.ipa" Payload
           rm -rf Payload
 
       - name: Upload IPA
