@@ -67,7 +67,7 @@ jobs:
       - name: Package Unsigned IPA
         run: |
           mkdir -p Payload
-          cp -R build-ios/Release-iphoneos/${APP_NAME}.app Payload/
+          cp -R build-ios/Release/${APP_NAME}.app Payload/
           zip -r ${APP_NAME}-unsigned.ipa Payload
           rm -rf Payload
 
