@@ -98,7 +98,7 @@ jobs:
           mv unsigned-apk/${APP_NAME}-aligned.apk unsigned-apk/${APP_NAME}.apk
 
       - name: Sign APK (optional)
-        if: env.ANDROID_KEYSTORE_BASE64 != ''
+        if: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
@@ -116,16 +116,24 @@ jobs:
             unsigned-apk/${APP_NAME}.apk
 
       - name: Verify Signature (optional)
-        if: env.ANDROID_KEYSTORE_BASE64 != ''
-        env:
-          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        if: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
         run: |
           SDK_ROOT=$HOME/android-sdk
           BUILD_TOOLS=$SDK_ROOT/build-tools/34.0.0
           $BUILD_TOOLS/apksigner verify --verbose --print-certs unsigned-apk/${APP_NAME}.apk
 
-      - name: Upload APK
+      # Upload signed APK if secret is present
+      - name: Upload signed APK
+        if: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' ? 'android-signed-apk' : 'android-unsigned-apk' }}
+          name: android-signed-apk
+          path: unsigned-apk/${APP_NAME}.apk
+
+      # Upload unsigned APK if secret is missing
+      - name: Upload unsigned APK
+        if: ${{ secrets.ANDROID_KEYSTORE_BASE64 == '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-unsigned-apk
           path: unsigned-apk/${APP_NAME}.apk
