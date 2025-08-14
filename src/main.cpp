@@ -10,12 +10,13 @@
 
 int main()
 {
-    sf::RenderWindow window(sf::VideoMode({200, 200}), "SFML works!");
+    sf::ContextSettings settings{ .antiAliasingLevel = 16 };
+    sf::RenderWindow window(sf::VideoMode({390, 844}), "SFML works!", sf::Style::Default, sf::State::Windowed, settings);
     sf::CircleShape shape(100.f);
     shape.setFillColor(sf::Color::Green);
 
-    sf::Font font("assets/play.ttf");
-    sf::Text text(font, "nadia :)");
+    sf::Font font("assets/font.ttf");
+    sf::Text text(font, "test  :)");
 
     text.setPosition(shape.getGlobalBounds().getCenter());
 
