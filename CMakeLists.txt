@@ -38,4 +38,4 @@ else()
 endif()
 
 target_compile_features(${APP_NAME} PRIVATE cxx_std_23)
-target_link_libraries(${APP_NAME} PRIVATE SFML::Graphics)
+target_link_libraries(${APP_NAME} PRIVATE SFML::Graphics SFML::Main)
