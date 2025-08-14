@@ -25,6 +25,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "iOS")
     add_executable(${APP_NAME} MACOSX_BUNDLE ${SRC_FILES})
     set_target_properties(${APP_NAME} PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${INFO_PLIST})
     add_custom_command(TARGET ${APP_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory "${ASSETS_DIR}" "$<TARGET_FILE_DIR:${APP_NAME}>/assets")
+    target_link_libraries(${APP_NAME} PRIVATE SFML::Main)
 
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Android")
     add_library(${APP_NAME} SHARED ${SRC_FILES})
