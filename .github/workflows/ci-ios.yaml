@@ -50,13 +50,13 @@ jobs:
       - name: Configure for iOS
         run: |
           cmake -S . -B build-ios \
+            -G Xcode \
             -DCMAKE_SYSTEM_NAME=iOS \
             -DCMAKE_OSX_SYSROOT=iphoneos \
             -DCMAKE_OSX_ARCHITECTURES=arm64 \
             -DCMAKE_CXX_STANDARD=23 \
             -DBUILD_SHARED_LIBS=OFF \
-            -DINFO_PLIST_PATH=$(pwd)/Info.plist \
-            -DAPP_NAME=${APP_NAME}
+            -DINFO_PLIST_PATH=$(pwd)/Info.plist
 
       - name: Build for iOS
         run: cmake --build build-ios --config Release
