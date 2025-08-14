@@ -11,6 +11,11 @@ jobs:
   build-android:
     name: Android APK
     runs-on: ubuntu-latest
+    env:
+      ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+      ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+      ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+      ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
     steps:
       - uses: actions/checkout@v4
 
@@ -98,12 +103,7 @@ jobs:
           mv unsigned-apk/${APP_NAME}-aligned.apk unsigned-apk/${APP_NAME}.apk
 
       - name: Sign APK (optional)
-        if: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
-        env:
-          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
-          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        if: ${{ env.ANDROID_KEYSTORE_BASE64 != '' }}
         run: |
           echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > my-release-key.keystore
           SDK_ROOT=$HOME/android-sdk
@@ -116,7 +116,7 @@ jobs:
             unsigned-apk/${APP_NAME}.apk
 
       - name: Verify Signature (optional)
-        if: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
+        if: ${{ env.ANDROID_KEYSTORE_BASE64 != '' }}
         run: |
           SDK_ROOT=$HOME/android-sdk
           BUILD_TOOLS=$SDK_ROOT/build-tools/34.0.0
@@ -124,7 +124,7 @@ jobs:
 
       # Upload signed APK if secret is present
       - name: Upload signed APK
-        if: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
+        if: ${{ env.ANDROID_KEYSTORE_BASE64 != '' }}
         uses: actions/upload-artifact@v4
         with:
           name: android-signed-apk
@@ -132,7 +132,7 @@ jobs:
 
       # Upload unsigned APK if secret is missing
       - name: Upload unsigned APK
-        if: ${{ secrets.ANDROID_KEYSTORE_BASE64 == '' }}
+        if: ${{ env.ANDROID_KEYSTORE_BASE64 == '' }}
         uses: actions/upload-artifact@v4
         with:
           name: android-unsigned-apk
