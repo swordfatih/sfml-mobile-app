@@ -1,3 +1,10 @@
+#ifdef __APPLE__
+    #include "TargetConditionals.h"
+    #if TARGET_OS_IPHONE
+        #include <SFML/Main.hpp>
+    #endif
+#endif
+
 #include <SFML/Graphics.hpp>
 
 int main()
