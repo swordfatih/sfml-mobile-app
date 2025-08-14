@@ -10,9 +10,10 @@
 
 int main()
 {
-    sf::ContextSettings settings{ .antiAliasingLevel = 16 };
+    sf::ContextSettings settings{.antiAliasingLevel = 4};
     sf::RenderWindow window(sf::VideoMode({390, 844}), "SFML works!", sf::Style::Default, sf::State::Windowed, settings);
-    sf::CircleShape shape(100.f);
+
+    sf::CircleShape shape(100.f, 100);
     shape.setFillColor(sf::Color::Green);
 
     sf::Font font("assets/font.ttf");
@@ -20,12 +21,12 @@ int main()
 
     text.setPosition(shape.getGlobalBounds().getCenter());
 
-    auto resolution = 3.f;
+    auto resolution = 2.f;
     sf::Vector2f view_size = {window.getSize().x * resolution, window.getSize().y * resolution};
 
     sf::View view;
     view.setSize(view_size);
-    view.setCenter({view_size.x / 2, view_size.y / 2});       
+    view.setCenter({view_size.x / 2, view_size.y / 2});
     window.setView(view);
 
     auto speed = 5.f;
