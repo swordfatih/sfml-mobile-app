@@ -21,14 +21,6 @@ int main()
 
     text.setPosition(shape.getGlobalBounds().getCenter());
 
-    auto resolution = 2.f;
-    sf::Vector2f view_size = {window.getSize().x * resolution, window.getSize().y * resolution};
-
-    sf::View view;
-    view.setSize(view_size);
-    view.setCenter({view_size.x / 2, view_size.y / 2});
-    window.setView(view);
-
     auto speed = 5.f;
     auto start = std::chrono::steady_clock::now();
     while (window.isOpen())
@@ -46,6 +38,8 @@ int main()
         }
 
         text.rotate(sf::radians(speed) * delta.count());
+
+        window.setView(sf::View{{{0.f, 0.f}, static_cast<sf::Vector2f>(window.getSize())}});
 
         window.clear();
         window.draw(shape);
