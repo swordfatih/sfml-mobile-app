@@ -1,6 +1,10 @@
 build
+build-android*
 out
 .cache
 .idea
 .vs
 .vscode
+*.keystore
+unsigned-apk
+android-tmp
