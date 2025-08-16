@@ -11,7 +11,7 @@
 int main()
 {
     sf::ContextSettings settings{.antiAliasingLevel = 4};
-    sf::RenderWindow window(sf::VideoMode({390, 844}), "SFML works!", sf::Style::Default, sf::State::Windowed, settings);
+    sf::RenderWindow window(sf::VideoMode::getDesktopMode(), "SFML works!", sf::Style::Default, sf::State::Fullscreen, settings);
 
     sf::CircleShape shape(100.f, 100);
     shape.setFillColor(sf::Color::Green);
